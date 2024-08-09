@@ -7,7 +7,7 @@ use secp256k1::{rand::rngs::JitterRng, PublicKey, Secp256k1};
 use serde_json::{json, Value};
 use std::borrow::Borrow;
 use std::fs::{read, File, OpenOptions};
-use std::io::{BufRead, BufReader, Read, Write};
+use std::io::{BufRead, BufReader, Lines, Read, Write};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tiny_keccak::keccak256;
 use web3::types::Address;
@@ -16,6 +16,10 @@ use web3::types::Address;
 async fn main() {
     println!("{}", "Bot started");
 
+    // let file = File::options().read(true).open("ethrich.txt").unwrap();
+    // let reader = BufReader::new(file);
+    // let mut lines = &mut reader.lines();
+
     loop {
         let _ = run_bot().await;
         continue;
@@ -23,10 +27,11 @@ async fn main() {
 }
 
 async fn run_bot() -> Result<()> {
-
+    let file = File::options().read(true).open("ethrich.txt").unwrap();
+    let reader = BufReader::new(file);
+    let mut lines = reader.lines();
     (0..num_cpus::get()).into_par_iter().for_each(|_| {
         for _ in 0..1000 / num_cpus::get() {
-
             let secp = Secp256k1::new();
             let get_nstime = || -> u64 {
                 let dur = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
@@ -44,10 +49,11 @@ async fn run_bot() -> Result<()> {
 
             // Filtering part...
             let address_string = format!("{:?}", pub_address);
+            println!("address: {}", &address_string.to_owned());
 
-            let file = File::options().read(true).open("ethereum.txt").unwrap();
+            let file = File::options().read(true).open("ethrich.txt").unwrap();
             let reader = BufReader::new(file);
-            let lines = reader.lines();
+            let mut lines = reader.lines();
 
             // let num_lines = reader.lines().count();
             // let pb = ProgressBar::new(num_lines as u64);
@@ -86,10 +92,17 @@ async fn run_bot() -> Result<()> {
                         .create(true)
                         .open("addresses.json");
                     writeln!(file.unwrap(), "{:?}", serde_json::to_string_pretty(&data));
+                } else if address_string.starts_with("0x123456") {
                 }
             }
 
-            if address_string.starts_with("0x123456") {
+            if (address_string.eq("0x0000000000000000000000000000000000000001")
+                || address_string.eq("0x0000000000000000000000000000000000000002")
+                || address_string.eq("0x1000000000000000000000000000000000000000")
+                || address_string.eq("0x2000000000000000000000000000000000000000")
+                || address_string.eq("0x3000000000000000000000000000000000000000")
+                || address_string.eq("0x0000000000000000000000000000000000000003"))
+            {
                 let json_data = json!({
                     "secret_key": format!("{:?}", secret_key),
                     "public_key": format!("{:?}", pub_key),
