@@ -14,3 +14,7 @@ Cargo.lock
 *.pdb
 
 ethrich.txt
+ethrich_sorted.txt
+ethrich_unsorted.txt
+ethrich_source_unsorted.txt
+ethrich_source_sorted.txt
